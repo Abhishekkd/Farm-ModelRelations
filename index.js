@@ -53,12 +53,29 @@ app.get('/farms/:id',async(req,res)=>{
     res.render('farms/show',{farm});
 })
 
+//combination routes
 
-
+app.get('/farms/:id/products/new',(req,res)=>{
+    const {id} =req.params;
+    res.render('products/new',{categories,id})
+})
+app.post('/farms/:id/products', async (req,res)=>{
+        const {id} = req.params;
+        const farm =  await Farm.findById(id);
+    //so to make a new product
+    //destructuring data from request body i.e from our form
+    const  {name,price,category}=req.body;
+    const product = new Product({name,price,category});
+    //so we need to connect these two and for that we're gonna push onto the products array in a farm
+    farm.products.push(product);
+    product.farm=farm;
+    
+    await farm.save();
+    await product.save();
+    res.send(product);
+})
 
 //product routes
-
-
 
 //this going to make a little page that we respond with,that contains information about all the products
 //maybe a table of products ,maybe a list of them
