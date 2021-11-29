@@ -10,10 +10,11 @@ const methodOverride = require('method-override')
 
 //requiring our model
 const Product = require('./models/product.js');
+const Farm = require('./models/farm');
 const categories =['fruit','vegetable','dairy'];
 
 // database is named farmStand where our collections will be stored and will be created for us
-mongoose.connect('mongodb://localhost:27017/farmStand', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect('mongodb://localhost:27017/farmStandTake2', { useNewUrlParser: true, useUnifiedTopology: true })
     .then(()=> {
         console.log("Mongo connected")
     })
@@ -26,6 +27,38 @@ app.set('view engine', 'ejs');
 app.use(express.urlencoded({extended: true}));
 // override with POST having ?_method=DELETE
 app.use(methodOverride('_method'))
+
+//farm routes
+
+//index page
+app.get('/farms',async(req,res)=>{
+    const farms= await Farm.find({});
+    res.render('farms/index',{ farms })
+})
+
+app.get('/farms/new',(req,res)=>{
+    res.render('farms/new');
+})
+app.post('/farms',async(req,res)=>{
+    //async handler because we are going to be making a new model
+    //instantiating a model,saving it thats asynchronous with mongoose
+   const farm = new Farm(req.body);
+   await farm.save();
+   res.redirect('/farms')
+
+})
+//details page(show page)
+app.get('/farms/:id',async(req,res)=>{
+    const farm=await Farm.findById(req.params.id);
+    res.render('farms/show',{farm});
+})
+
+
+
+
+//product routes
+
+
 
 //this going to make a little page that we respond with,that contains information about all the products
 //maybe a table of products ,maybe a list of them
