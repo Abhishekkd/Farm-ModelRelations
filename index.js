@@ -54,6 +54,11 @@ app.get('/farms/:id',async(req,res)=>{
     console.log(farm);
     res.render('farms/show',{farm});
 })
+//delete routes,on deleting a farm all its products need to go away
+app.delete('/farms/:id',async(req,res)=>{
+    const farm = await Farm.findByIdAndDelete(req.params.id);
+    res.redirect('/farms')
+})
 
 //combination routes
 
