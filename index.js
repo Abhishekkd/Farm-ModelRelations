@@ -49,15 +49,18 @@ app.post('/farms',async(req,res)=>{
 })
 //details page(show page)
 app.get('/farms/:id',async(req,res)=>{
-    const farm=await Farm.findById(req.params.id);
+    //populating products on farm
+    const farm=await Farm.findById(req.params.id).populate('products');
+    console.log(farm);
     res.render('farms/show',{farm});
 })
 
 //combination routes
 
-app.get('/farms/:id/products/new',(req,res)=>{
+app.get('/farms/:id/products/new',async(req,res)=>{
     const {id} =req.params;
-    res.render('products/new',{categories,id})
+    const farm =  await Farm.findById(id);
+    res.render('products/new',{categories,farm})
 })
 app.post('/farms/:id/products', async (req,res)=>{
         const {id} = req.params;
@@ -69,10 +72,11 @@ app.post('/farms/:id/products', async (req,res)=>{
     //so we need to connect these two and for that we're gonna push onto the products array in a farm
     farm.products.push(product);
     product.farm=farm;
-    
     await farm.save();
     await product.save();
-    res.send(product);
+    //this id is coming from mongo rather than the one above
+    //could have used id also
+    res.redirect(`/farms/${farm._id}`);
 })
 
 //product routes
@@ -124,7 +128,9 @@ app.post('/products',async (req,res)=>{
 //show route
 app.get('/products/:id',async (req,res)=>{
     const {id} = req.params;
-   const product=await Product.findById(id);
+    //to show data from farm field we need to populate our product with farm field
+   const product=await Product.findById(id).populate('farm','name');
+   
    //now rendering a template
    //we'll pass in the product that we found 
    res.render("products/show", {product})
